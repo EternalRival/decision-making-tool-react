@@ -1,0 +1,29 @@
+.ui-dialog {
+  composes: ui-dialog from global;
+}
+
+.container {
+  display: flex;
+  padding: 1rem;
+  flex-direction: column;
+  gap: 1rem;
+
+
+  background-image: linear-gradient(var(--color-primary-300), var(--color-primary-700));
+  border-radius: 0.5rem;
+  box-shadow: 0 0 0.25rem 0.1rem var(--color-primary-200);
+}
+
+.warning {
+  padding: 1rem;
+
+  color: var(--color-primary-50);
+  text-shadow: 0 0 0.25rem var(--color-primary-50);
+  white-space: pre-line;
+
+  background-color: var(--color-primary-800);
+}
+
+.close-button {
+  margin-left: auto;
+}

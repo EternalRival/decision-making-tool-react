@@ -73,3 +73,28 @@ button {
   clip: rect(0, 0, 0, 0);
   border-width: 0;
 }
+
+.ui-dialog {
+  overflow: unset;
+  padding: 0;
+  background: unset;
+  border: unset;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  &::backdrop {
+    backdrop-filter: blur(0.1875rem);
+    transition-duration: var(--transition-duration);
+    transition-property: backdrop-filter;
+  }
+
+  &.darkened::backdrop {
+    backdrop-filter: blur(0.1875rem) brightness(0.75);
+  }
+}
+
+body:has(dialog[open]) {
+  overflow: hidden;
+}

@@ -1,11 +1,15 @@
-import { APP_NAME, OPTIONS_JSON_FILE_NAME } from '~/core/models/constants';
+import { lazy, useState } from 'react';
+import { useNavigate } from 'react-router';
+import UiButton from '~/core/components/ui-button';
+import { APP_NAME, OPTIONS_JSON_FILE_NAME, SLICE_LIST_MIN_LENGTH } from '~/core/models/constants';
+import { useDispatch, useSelector } from '~/core/store/hooks';
+import { addOption, clearOptions, parseOptions, replaceOptions } from '~/core/store/options-slice';
+import Route from '~/route.enum';
 import OptionList from '../components/option-list';
 import styles from './list-of-options.module.css';
-import { useDispatch, useSelector } from '~/core/store/hooks';
-import UiButton from '~/core/components/ui-button';
-import { clearOptions, createOption, parseOptions, replaceOptions } from '~/core/store/options-slice';
-import { Link } from 'react-router';
-import Route from '~/route.enum';
+
+const PasteOptionListDialog = lazy(() => import('../components/paste-option-list-dialog'));
+const WarningDialog = lazy(() => import('../components/warning-dialog'));
 
 const ADD_BUTTON_TEXT = 'Add Option';
 const PASTE_MODE_BUTTON_TEXT = 'Paste list';
@@ -17,6 +21,10 @@ const START_BUTTON_TEXT = 'Start';
 const ListOfOptions = () => {
   const { lastId, list } = useSelector((state) => state.options);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const [pasteModalOpen, setPasteModalOpen] = useState(false);
+  const [warningModalOpen, setWarningModalOpen] = useState(false);
 
   return (
     <main className={styles.main}>
@@ -27,7 +35,7 @@ const ListOfOptions = () => {
       <UiButton
         className={styles.addOptionButton}
         onClick={() => {
-          dispatch(createOption());
+          dispatch(addOption({ title: '', weight: '' }));
         }}
       >
         {ADD_BUTTON_TEXT}
@@ -36,11 +44,20 @@ const ListOfOptions = () => {
       <UiButton
         className={styles.pasteListButton}
         onClick={() => {
-          // todo modal
+          setPasteModalOpen(true);
         }}
       >
         {PASTE_MODE_BUTTON_TEXT}
       </UiButton>
+      <PasteOptionListDialog
+        open={pasteModalOpen}
+        onClose={() => {
+          setPasteModalOpen(false);
+        }}
+        onConfirm={(options) => {
+          options.forEach(([title, weight]) => dispatch(addOption({ title, weight })));
+        }}
+      />
 
       <UiButton
         className={styles.clearListButton}
@@ -82,12 +99,27 @@ const ListOfOptions = () => {
         {LOAD_LIST_FROM_FILE_BUTTON_TEXT}
       </UiButton>
 
-      <Link
+      <UiButton
         className={styles.startButton}
-        to={Route.DECISION_PICKER}
+        onClick={() => {
+          const isPlayable =
+            list.filter((option) => Boolean(option.title) && Number(option.weight) > 0).length >= SLICE_LIST_MIN_LENGTH;
+
+          if (isPlayable) {
+            void navigate(Route.DECISION_PICKER);
+          } else {
+            setWarningModalOpen(true);
+          }
+        }}
       >
         {START_BUTTON_TEXT}
-      </Link>
+      </UiButton>
+      <WarningDialog
+        open={warningModalOpen}
+        onClose={() => {
+          setWarningModalOpen(false);
+        }}
+      />
     </main>
   );
 };

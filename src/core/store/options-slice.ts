@@ -27,12 +27,12 @@ const optionsSlice = createSlice({
   name: 'options',
   initialState,
   reducers: {
-    createOption(state) {
+    addOption(state, { payload }: PayloadAction<Omit<OptionData, 'id'>>) {
       state.lastId += 1;
       state.list.push({
         id: `#${state.lastId.toString()}`,
-        title: '',
-        weight: '',
+        title: payload.title,
+        weight: payload.weight,
       });
     },
 
@@ -66,7 +66,7 @@ const optionsSlice = createSlice({
   },
 });
 
-export const { createOption, updateOption, deleteOption, clearOptions, replaceOptions } = optionsSlice.actions;
+export const { addOption, updateOption, deleteOption, clearOptions, replaceOptions } = optionsSlice.actions;
 
 export function parseOptions(value: unknown) {
   return optionsStateSchema.parse(value);

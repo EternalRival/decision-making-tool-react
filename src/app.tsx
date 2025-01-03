@@ -4,7 +4,7 @@ import store from './core/store/store';
 
 const App = () => (
   <Provider store={store}>
-    <Router />;
+    <Router />
   </Provider>
 );
 

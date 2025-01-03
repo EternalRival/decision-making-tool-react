@@ -1,0 +1,45 @@
+.ui-dialog {
+  composes: ui-dialog from global;
+}
+
+.container {
+  display: grid;
+  grid-template:
+    'textarea textarea' min-content
+    'cancel confirm' min-content
+    / 1fr 1fr;
+  gap: 1rem;
+
+  padding: 1rem;
+
+  background-image: linear-gradient(var(--color-primary-300), var(--color-primary-700));
+  border-radius: 0.5rem;
+  box-shadow: 0 0 0.25rem 0.1rem var(--color-primary-200);
+}
+
+.textarea {
+  composes: scrollbar from global;
+
+  resize: none;
+
+  grid-area: textarea;
+
+  padding: 0.5rem;
+
+  font-family: 'Victor Mono', 'Courier New', Courier, monospace;
+  color: var(--color-primary-50);
+
+  background-color: var(--color-primary-800);
+
+  &::placeholder {
+    color: var(--color-primary-300);
+  }
+}
+
+.cancel {
+  grid-area: cancel;
+}
+
+.confirm {
+  grid-area: confirm;
+}

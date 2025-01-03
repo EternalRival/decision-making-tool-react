@@ -45,7 +45,6 @@
 }
 
 .start-button {
-  composes: ui-button from '~/core/components/ui-button.module.css';
   grid-area: start-button;
   text-decoration: none;
 }
