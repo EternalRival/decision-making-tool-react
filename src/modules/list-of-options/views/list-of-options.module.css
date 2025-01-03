@@ -1,0 +1,51 @@
+.main {
+  display: grid;
+  grid-template:
+    'heading heading' min-content
+    'option-list option-list' min-content
+    'add-option-button add-option-button' min-content
+    'paste-list-button paste-list-button' min-content
+    'clear-list-button clear-list-button' min-content
+    'save-list-button load-list-button' min-content
+    'start-button start-button' min-content
+    / 1fr 1fr;
+  gap: 1rem;
+
+  width: 100%;
+  max-width: 48rem;
+  margin-inline: auto;
+  padding: 1rem;
+}
+
+.heading {
+  grid-area: heading;
+  color: var(--color-primary-50);
+  text-align: center;
+  text-shadow: 0 0 0.25rem var(--color-primary-50);
+}
+
+.add-option-button {
+  grid-area: add-option-button;
+}
+
+.paste-list-button {
+  grid-area: paste-list-button;
+}
+
+.clear-list-button {
+  grid-area: clear-list-button;
+}
+
+.save-list-button {
+  grid-area: save-list-button;
+}
+
+.load-list-button {
+  grid-area: load-list-button;
+}
+
+.start-button {
+  composes: ui-button from '~/core/components/ui-button.module.css';
+  grid-area: start-button;
+  text-decoration: none;
+}

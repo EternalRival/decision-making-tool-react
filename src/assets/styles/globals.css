@@ -28,6 +28,10 @@ body {
   background-color: var(--color-primary-500);
 }
 
+#root {
+  display: contents;
+}
+
 :is(body, .scrollbar) {
   &::-webkit-scrollbar {
     width: 0.6rem;

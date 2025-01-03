@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import '~/assets/styles/globals.css';
-// import App from './App.tsx'
+import App from './app';
 
 const root = document.getElementById('root');
 
@@ -11,7 +11,6 @@ if (root === null) {
 
 createRoot(root).render(
   <StrictMode>
-    123
-    {/* <App /> */}
+    <App />
   </StrictMode>
 );
