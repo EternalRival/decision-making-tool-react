@@ -1,0 +1,8 @@
+import{r as f,j as o,U as m}from"./index-CJd4kCnu.js";import{r as g,a as u,F as d,b as _}from"./animate-dialog-DazWgCrD.js";const x="_ui-dialog_cfl9d_1 ui-dialog",T="_container_cfl9d_5",h="_textarea_cfl9d_20 scrollbar",w="_cancel_cfl9d_39",D="_confirm_cfl9d_43",i={uiDialog:x,container:T,textarea:h,cancel:w,confirm:D},A=`
+title,1                 -> | title                 | 1 |
+title with whitespace,2 -> | title with whitespace | 2 |
+title , with , commas,3 -> | title , with , commas | 3 |
+title with "quotes",4   -> | title with "quotes"   | 4 |
+`.trim(),C=`Paste a list of new options in a CSV-like format:
+
+${A}`,y="Confirm",N="Cancel";function L(a){return a?a.split(/\n/).reduce((s,n)=>{const e=/^(.*)[\t,]\s*(\d*)\s*$/.exec(n);return e&&typeof e[1]=="string"&&typeof e[2]=="string"&&s.push([e[1].trim(),e[2].trim()]),s},[]):[]}const b=({open:a,onClose:s,onConfirm:n})=>{const[e,p]=f.useState(""),c=f.useRef(null),E=async()=>{const{current:t}=c;t&&(t.showModal(),await u(t,d.keyframes,d.options))},r=async t=>{const{current:l}=c;l&&(await u(l,_.keyframes,_.options),l.close(t))};return f.useLayoutEffect(()=>{a&&E()},[a]),a&&g.createPortal(o.jsx("dialog",{ref:c,className:i.uiDialog,onClick:t=>{t.target===t.currentTarget&&r("cancel")},onClose:()=>{s()},children:o.jsxs("form",{className:i.container,onSubmit:t=>{t.preventDefault(),n(L(e)),r()},children:[o.jsx("textarea",{className:i.textarea,rows:12,cols:64,placeholder:C,name:"table",onInput:t=>{t.target instanceof HTMLTextAreaElement&&p(t.target.value)}}),o.jsx(m,{type:"button",className:i.cancel,onClick:()=>{r()},children:N}),o.jsx(m,{className:i.confirm,children:y})]})}),document.body)};export{b as default};
