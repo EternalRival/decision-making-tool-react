@@ -1,8 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router';
+import DecisionPicker from '~/modules/decision-picker/views/decision-picker';
 import ListOfOptions from '~/modules/list-of-options/views/list-of-options';
 import RouteUrl from './route.enum';
-
-const DecisionPicker = () => 'Decision Picker';
 
 const Router = () => (
   <BrowserRouter>

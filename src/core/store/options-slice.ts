@@ -12,7 +12,7 @@ const optionsStateSchema = z.object({
   list: z.array(optionDataSchema),
 });
 
-type OptionData = z.infer<typeof optionDataSchema>;
+export type OptionData = z.infer<typeof optionDataSchema>;
 
 type OptionField = keyof OptionData;
 
