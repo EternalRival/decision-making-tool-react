@@ -1,4 +1,4 @@
-import{r as f,j as o,U as m}from"./index-CJd4kCnu.js";import{r as g,a as u,F as d,b as _}from"./animate-dialog-DazWgCrD.js";const x="_ui-dialog_cfl9d_1 ui-dialog",T="_container_cfl9d_5",h="_textarea_cfl9d_20 scrollbar",w="_cancel_cfl9d_39",D="_confirm_cfl9d_43",i={uiDialog:x,container:T,textarea:h,cancel:w,confirm:D},A=`
+import{r as f,j as o,U as m}from"./index-DcOK9dFU.js";import{r as g,a as u,F as d,b as _}from"./animate-dialog-C_jm95GO.js";const x="_ui-dialog_cfl9d_1 ui-dialog",T="_container_cfl9d_5",h="_textarea_cfl9d_20 scrollbar",w="_cancel_cfl9d_39",D="_confirm_cfl9d_43",i={uiDialog:x,container:T,textarea:h,cancel:w,confirm:D},A=`
 title,1                 -> | title                 | 1 |
 title with whitespace,2 -> | title with whitespace | 2 |
 title , with , commas,3 -> | title , with , commas | 3 |
