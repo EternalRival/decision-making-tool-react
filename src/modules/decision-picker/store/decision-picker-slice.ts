@@ -1,15 +1,8 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import { z } from 'zod';
 import LSService from '~/core/services/local-storage.service';
+import decisionPickerStateSchema, { type DecisionPickerState } from '../schemas/decision-picker-state.schema';
 
 const STORAGE_KEY = 'decision-picker';
-
-const decisionPickerStateSchema = z.object({
-  soundEnabled: z.boolean(),
-  durationValue: z.number(),
-});
-
-type DecisionPickerState = z.infer<typeof decisionPickerStateSchema>;
 
 const initialState = (): DecisionPickerState => {
   try {
@@ -33,10 +26,6 @@ const decisionPickerSlice = createSlice({
 });
 
 export const { setDuration, toggleMute } = decisionPickerSlice.actions;
-
-export function parseDecisionPickerState(value: unknown) {
-  return decisionPickerStateSchema.parse(value);
-}
 
 export function persistDecisionPickerState(getState: () => DecisionPickerState) {
   window.addEventListener('beforeunload', () => {

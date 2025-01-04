@@ -1,326 +1,135 @@
-import { useEffect, useRef } from 'react';
+import clsx from 'clsx';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { OptionData } from '~/core/schemas/options-state.schema';
+import { useSelector } from '~/core/store/hooks';
+import animate from '~/core/utils/animate';
+import easeInOut from '~/core/utils/ease-in-out';
+import getRandomColor from '~/core/utils/get-random-color';
+import shuffle from '~/core/utils/shuffle';
+import { CANVAS_SIZE, CIRCLE } from '../model/constants';
+import type { OptionSlice } from '../model/option-slice.type';
+import RotationStatus from '../model/rotation-status.enum';
+import type { DecisionPickerState } from '../schemas/decision-picker-state.schema';
+import drawWheel from '../utils/draw-wheel';
+import playTaDaSound from '../utils/play-ta-da-sound';
+import rotationEmitter from '../utils/rotation-emitter';
 import styles from './wheel.module.css';
 
-const CIRCLE = 2 * Math.PI;
+const PICKED_OPTION_INITIAL_TEXT = 'Press start button'.toUpperCase();
 
-const CANVAS_SIZE = 512;
 const CANVAS_TEXT = 'Decision Picker Wheel';
 
-const STROKE_COLOR_PROPERTY = '--color-primary-50';
-const SHADOW_COLOR_PROPERTY = '--color-primary-900';
+function createOptionSliceList(optionDataList: OptionData[]): OptionSlice[] {
+  const total = optionDataList.reduce((acc, { weight }) => acc + Number(weight), 0);
+  const offset = { value: 0 };
 
-const GRADIENT_START_COLOR_PROPERTY = '--color-primary-300';
-const GRADIENT_END_COLOR_PROPERTY = '--color-primary-700';
+  return optionDataList.map(({ id, title, weight }) => {
+    const color = getRandomColor();
+    const startAngle = offset.value;
+    const endAngle = offset.value + (Number(weight) / total) * 2 * Math.PI;
 
-const DEFAULT_GRADIENT_START_COLOR = '#66baba';
-const DEFAULT_GRADIENT_END_COLOR = '#005454';
-const DEFAULT_STROKE_COLOR = '#e6f4f4';
-const DEFAULT_SHADOW_COLOR = '#001c1c';
-const DEFAULT_SLICE_TEXT_SHADOW_COLOR = '#00000080';
-const FONT_FAMILY = 'Inter';
+    offset.value = endAngle;
 
-const center = CANVAS_SIZE / 2;
-const padding = CANVAS_SIZE / 32;
-const fontSize = CANVAS_SIZE / 32;
-const wheelRadius = center - padding;
-const centerCircleRadius = wheelRadius / 8;
-
-export type OptionSlice = {
-  id: string;
-  title: string;
-  color: string;
-  startAngle: number;
-  endAngle: number;
-};
-
-type GradientColor = {
-  start: string;
-  end: string;
-};
-
-function drawShadow({
-  ctx,
-  center,
-  wheelRadius,
-  padding,
-  shadowColor,
-}: {
-  ctx: CanvasRenderingContext2D;
-  center: number;
-  wheelRadius: number;
-  padding: number;
-  shadowColor: string;
-}): void {
-  ctx.save();
-
-  const path = new Path2D();
-
-  path.arc(center, center, wheelRadius, 0, CIRCLE);
-
-  Object.assign(ctx, { shadowColor, shadowBlur: padding });
-
-  ctx.fill(path);
-  ctx.fill(path);
-
-  ctx.restore();
-}
-
-function drawSlice({
-  ctx,
-  center,
-  wheelRadius,
-  rotation,
-  slice,
-  strokeColor,
-}: {
-  ctx: CanvasRenderingContext2D;
-  center: number;
-  wheelRadius: number;
-  rotation: number;
-  slice: OptionSlice;
-  strokeColor: string;
-}): void {
-  const { startAngle, endAngle, color } = slice;
-
-  ctx.save();
-
-  const path = new Path2D();
-
-  path.moveTo(center, center);
-  path.arc(center, center, wheelRadius, startAngle + rotation, endAngle + rotation);
-  path.lineTo(center, center);
-
-  Object.assign(ctx, { lineWidth: 2, strokeStyle: strokeColor, fillStyle: color });
-
-  ctx.fill(path);
-  ctx.stroke(path);
-
-  ctx.restore();
-}
-
-function clipCanvasText({
-  ctx,
-  text,
-  maxWidth,
-}: {
-  ctx: CanvasRenderingContext2D;
-  text: string;
-  maxWidth: number;
-}): string {
-  const { actualBoundingBoxLeft, actualBoundingBoxRight } = ctx.measureText(text);
-
-  if (actualBoundingBoxRight + actualBoundingBoxLeft < maxWidth) {
-    return text;
-  }
-
-  return clipCanvasText({ ctx, text: `${text.slice(0, -2).trimEnd()}…`, maxWidth });
-}
-
-function drawSliceText({
-  ctx,
-  center,
-  wheelRadius,
-  centerCircleRadius,
-  rotation,
-  fontSize,
-  slice,
-  textStrokeColor,
-  textFillColor,
-}: {
-  ctx: CanvasRenderingContext2D;
-  center: number;
-  wheelRadius: number;
-  centerCircleRadius: number;
-  rotation: number;
-  fontSize: number;
-  slice: OptionSlice;
-  textStrokeColor: string;
-  textFillColor: string;
-}): void {
-  const { startAngle, endAngle, title } = slice;
-
-  ctx.save();
-
-  if (endAngle - startAngle > 0.25) {
-    ctx.translate(center, center);
-    ctx.rotate(startAngle + (endAngle - startAngle) / 2 + rotation);
-
-    Object.assign(ctx, {
-      textAlign: 'center',
-      textBaseline: 'middle',
-      font: `${fontSize.toString()}px ${FONT_FAMILY}`,
-      lineWidth: fontSize / 8,
-      strokeStyle: textStrokeColor,
-      fillStyle: textFillColor,
-      shadowColor: DEFAULT_SLICE_TEXT_SHADOW_COLOR,
-      shadowBlur: fontSize / 2,
-    });
-
-    const text = clipCanvasText({ ctx, text: title, maxWidth: wheelRadius - centerCircleRadius * 2.5 });
-
-    ctx.strokeText(text, (wheelRadius + centerCircleRadius) / 2, 0);
-    ctx.fillText(text, (wheelRadius + centerCircleRadius) / 2, 0);
-  }
-
-  ctx.restore();
-}
-
-function drawSliceList({
-  ctx,
-  sliceList,
-  center,
-  wheelRadius,
-  centerCircleRadius,
-  rotation,
-  fontSize,
-  strokeColor,
-  textStrokeColor,
-  textFillColor,
-}: {
-  ctx: CanvasRenderingContext2D;
-  sliceList: OptionSlice[];
-  center: number;
-  wheelRadius: number;
-  centerCircleRadius: number;
-  rotation: number;
-  fontSize: number;
-  strokeColor: string;
-  textStrokeColor: string;
-  textFillColor: string;
-}): void {
-  sliceList.forEach((slice) => {
-    drawSlice({ ctx, center, wheelRadius, rotation, slice, strokeColor });
-    drawSliceText({
-      ctx,
-      center,
-      wheelRadius,
-      centerCircleRadius,
-      rotation,
-      fontSize,
-      slice,
-      textStrokeColor,
-      textFillColor,
-    });
+    return { id, title, color, startAngle, endAngle };
   });
 }
 
-function drawCenterCircle({
-  ctx,
-  center,
-  centerCircleRadius,
-  gradientColor,
-  strokeColor,
-}: {
-  ctx: CanvasRenderingContext2D;
-  center: number;
-  centerCircleRadius: number;
-  gradientColor: GradientColor;
-  strokeColor: string;
-}): void {
-  ctx.save();
+function getTitleByRadian(sliceList: OptionSlice[], radian: number) {
+  const CIRCLE = 2 * Math.PI;
+  const offset = CIRCLE - (radian % CIRCLE);
 
-  const path = new Path2D();
+  const slice =
+    sliceList.find(({ startAngle, endAngle }) => offset >= startAngle && offset <= endAngle) ?? sliceList.at(-1);
 
-  path.arc(center, center, centerCircleRadius, 0, CIRCLE);
+  if (!slice) {
+    throw new Error('Option slice not found');
+  }
 
-  const gradient = ctx.createLinearGradient(0, center - centerCircleRadius, 0, center + centerCircleRadius);
-
-  gradient.addColorStop(0, gradientColor.start);
-  gradient.addColorStop(1, gradientColor.end);
-
-  Object.assign(ctx, { lineWidth: 2, strokeStyle: strokeColor, fillStyle: gradient });
-
-  ctx.fill(path);
-  ctx.stroke(path);
-
-  ctx.restore();
+  return slice.title;
 }
 
-function drawCursor({
-  ctx,
-  center,
-  padding,
-  gradientColor,
-  strokeColor,
-}: {
-  ctx: CanvasRenderingContext2D;
-  center: number;
-  padding: number;
-  gradientColor: GradientColor;
-  strokeColor: string;
-}): void {
-  ctx.save();
+type WheelProps = {
+  onRotationStatusChange: (rotationStatus: RotationStatus) => void;
+};
 
-  const path = new Path2D();
+const Wheel = ({ onRotationStatusChange }: WheelProps) => {
+  const optionList = useSelector((store) => store.options.list);
 
-  path.moveTo(center, padding / 2);
-  path.lineTo(center + padding, 0);
-  path.lineTo(center, padding * 2);
-  path.lineTo(center - padding, 0);
-  path.lineTo(center, padding / 2);
+  const sliceList = useMemo(
+    () =>
+      createOptionSliceList(shuffle(optionList.filter((option) => Boolean(option.title) && Number(option.weight) > 0))),
+    [optionList]
+  );
 
-  const gradient = ctx.createLinearGradient(0, 0, 0, padding * 2);
+  const [rotationStatus, setRotationStatus] = useState(RotationStatus.INITIAL);
+  const [pickedOption, setPickedOption] = useState(PICKED_OPTION_INITIAL_TEXT);
+  const [rotation, setRotation] = useState(0);
 
-  gradient.addColorStop(0, gradientColor.start);
-  gradient.addColorStop(1, gradientColor.end);
-
-  Object.assign(ctx, { lineWidth: 2, strokeStyle: strokeColor, fillStyle: gradient });
-
-  ctx.fill(path);
-  ctx.stroke(path);
-
-  ctx.restore();
-}
-
-type WheelProps = { rotation: number; optionSliceList: OptionSlice[] };
-
-const Wheel = ({ rotation: baseRotation, optionSliceList: sliceList }: WheelProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    onRotationStatusChange(rotationStatus);
+  }, [onRotationStatusChange, rotationStatus]);
 
   useEffect(() => {
     const ctx = canvasRef.current?.getContext('2d');
 
     if (ctx) {
-      const rotation = (baseRotation + CIRCLE * 0.75) % CIRCLE;
-
-      const computedStyle = getComputedStyle(document.documentElement);
-
-      const gradientColor = {
-        start: computedStyle.getPropertyValue(GRADIENT_START_COLOR_PROPERTY) || DEFAULT_GRADIENT_START_COLOR,
-        end: computedStyle.getPropertyValue(GRADIENT_END_COLOR_PROPERTY) || DEFAULT_GRADIENT_END_COLOR,
-      };
-      const strokeColor = computedStyle.getPropertyValue(STROKE_COLOR_PROPERTY) || DEFAULT_STROKE_COLOR;
-      const shadowColor = computedStyle.getPropertyValue(SHADOW_COLOR_PROPERTY) || DEFAULT_SHADOW_COLOR;
-
-      ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-
-      drawShadow({ ctx, center, wheelRadius, padding, shadowColor });
-      drawSliceList({
-        ctx,
-        sliceList,
-        center,
-        wheelRadius,
-        centerCircleRadius,
-        rotation,
-        fontSize,
-        strokeColor,
-        textFillColor: strokeColor,
-        textStrokeColor: shadowColor,
-      });
-      drawCenterCircle({ ctx, center, centerCircleRadius, gradientColor, strokeColor });
-      drawCursor({ ctx, center, padding, gradientColor, strokeColor });
+      drawWheel({ ctx, sliceList, rotation: (rotation + CIRCLE * 0.75) % CIRCLE });
     }
-  }, [baseRotation, sliceList]);
+  }, [rotation, sliceList]);
+
+  useEffect(() => {
+    function handleRotation({ durationValue, soundEnabled }: DecisionPickerState) {
+      setRotationStatus(RotationStatus.PICKING);
+
+      const targetRotationOffset = CIRCLE * Math.random();
+
+      const fullTurnsRotation = durationValue * CIRCLE;
+      const targetRotation = fullTurnsRotation + targetRotationOffset;
+
+      animate({
+        duration: durationValue,
+        easingFn: easeInOut,
+        onFrameChange: (progress) => {
+          const rotation = progress * targetRotation;
+
+          setRotation(rotation);
+          setPickedOption(getTitleByRadian(sliceList, rotation));
+        },
+        onFinish: () => {
+          setRotation(targetRotation);
+          setRotationStatus(RotationStatus.PICKED);
+
+          if (canvasRef.current && soundEnabled) {
+            void playTaDaSound();
+          }
+        },
+      });
+    }
+
+    rotationEmitter.on(handleRotation);
+
+    return () => {
+      rotationEmitter.off(handleRotation);
+    };
+  }, [sliceList]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className={styles.wheelCanvas}
-      width={CANVAS_SIZE}
-      height={CANVAS_SIZE}
-    >
-      {CANVAS_TEXT}
-    </canvas>
+    <>
+      <p className={clsx(styles.pickedOption, rotationStatus === RotationStatus.PICKED && styles.picked)}>
+        {pickedOption}
+      </p>
+
+      <canvas
+        ref={canvasRef}
+        className={styles.wheelCanvas}
+        width={CANVAS_SIZE}
+        height={CANVAS_SIZE}
+      >
+        {CANVAS_TEXT}
+      </canvas>
+    </>
   );
 };
 

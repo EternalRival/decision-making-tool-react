@@ -2,8 +2,9 @@ import { lazy, useState } from 'react';
 import { useNavigate } from 'react-router';
 import UiButton from '~/core/components/ui-button';
 import { APP_NAME, OPTIONS_JSON_FILE_NAME, SLICE_LIST_MIN_LENGTH } from '~/core/models/constants';
+import optionsStateSchema from '~/core/schemas/options-state.schema';
 import { useDispatch, useSelector } from '~/core/store/hooks';
-import { addOption, clearOptions, parseOptionsState, replaceOptions } from '~/core/store/options-slice';
+import { addOption, clearOptions, replaceOptions } from '~/core/store/options-slice';
 import Route from '~/route.enum';
 import OptionList from '../components/option-list';
 import styles from './list-of-options.module.css';
@@ -93,7 +94,7 @@ const ListOfOptions = () => {
                 }
               },
             }).click();
-          }).then((data) => dispatch(replaceOptions(parseOptionsState(JSON.parse(data)))));
+          }).then((data) => dispatch(replaceOptions(optionsStateSchema.parse(JSON.parse(data)))));
         }}
       >
         {LOAD_LIST_FROM_FILE_BUTTON_TEXT}
