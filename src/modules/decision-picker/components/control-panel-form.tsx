@@ -1,11 +1,11 @@
+import clsx from 'clsx';
 import { Link } from 'react-router';
-import UiButton from '~/core/components/ui-button';
-import Route from '~/route.enum';
-import styles from './control-panel-form.module.css';
 import SvgIcon from '~/core/components/svg-icon';
-import { toggleMute } from '../store/sound-slice';
-import { useState } from 'react';
+import UiButton from '~/core/components/ui-button';
 import { useDispatch, useSelector } from '~/core/store/hooks';
+import Route from '~/route.enum';
+import { setDuration, toggleMute } from '../store/decision-picker-slice';
+import styles from './control-panel-form.module.css';
 
 const BACK_BUTTON_TEXT = 'Back';
 
@@ -14,24 +14,25 @@ const TOGGLE_SOUND_BUTTON_TEXT = 'Toggle sound';
 const DURATION_LABEL_TEXT = 'Duration';
 const DURATION_INPUT_PLACEHOLDER_TEXT = 'sec';
 const DURATION_MIN_VALUE = '5';
-const DURATION_INITIAL_VALUE = '16';
 
 const PICK_BUTTON_TEXT = 'Pick';
 
-type ControlPanelFormProps = { onSubmit: (props: { duration: number; sound: boolean }) => void };
+type ControlPanelFormProps = {
+  disabled: boolean;
+  onSubmit: (props: { duration: number; sound: boolean }) => void;
+};
 
-const ControlPanelForm = ({ onSubmit }: ControlPanelFormProps) => {
-  const [duration, setDuration] = useState(DURATION_INITIAL_VALUE);
-  const soundEnabled = useSelector((store) => store.sound.soundEnabled);
+const ControlPanelForm = ({ disabled, onSubmit }: ControlPanelFormProps) => {
+  const { durationValue, soundEnabled } = useSelector((store) => store.decisionPicker);
   const dispatch = useDispatch();
 
   return (
     <form
-      className={styles.form}
+      className={clsx(styles.form, disabled && styles.disabled)}
       onSubmit={(event) => {
         event.preventDefault();
 
-        onSubmit({ duration: Number(duration), sound: soundEnabled });
+        onSubmit({ duration: durationValue, sound: soundEnabled });
       }}
     >
       <Link
@@ -39,14 +40,17 @@ const ControlPanelForm = ({ onSubmit }: ControlPanelFormProps) => {
         to={Route.LIST_OF_OPTION}
         title={BACK_BUTTON_TEXT}
         aria-label={BACK_BUTTON_TEXT}
+        tabIndex={disabled ? -1 : 0}
       >
         <SvgIcon name="square-arrow-out-up-left" />
       </Link>
 
       <UiButton
-        className={styles.soundLabel}
+        type="button"
+        className={styles.soundButton}
         title={TOGGLE_SOUND_BUTTON_TEXT}
         aria-label={TOGGLE_SOUND_BUTTON_TEXT}
+        disabled={disabled}
         onClick={() => {
           dispatch(toggleMute());
         }}
@@ -64,9 +68,10 @@ const ControlPanelForm = ({ onSubmit }: ControlPanelFormProps) => {
           className={styles.durationInput}
           type="number"
           min={DURATION_MIN_VALUE}
-          defaultValue={duration}
+          defaultValue={durationValue}
           required
           placeholder={DURATION_INPUT_PLACEHOLDER_TEXT}
+          disabled={disabled}
           onKeyDown={(event) => {
             if (event.key === 'Enter') {
               event.preventDefault();
@@ -74,7 +79,7 @@ const ControlPanelForm = ({ onSubmit }: ControlPanelFormProps) => {
           }}
           onInput={(event) => {
             if (event.target instanceof HTMLInputElement) {
-              setDuration(event.target.value);
+              dispatch(setDuration({ durationValue: Number(event.target.value) }));
             }
           }}
         />
@@ -84,6 +89,7 @@ const ControlPanelForm = ({ onSubmit }: ControlPanelFormProps) => {
         className={styles.pickButton}
         title={PICK_BUTTON_TEXT}
         aria-label={PICK_BUTTON_TEXT}
+        disabled={disabled}
       >
         <SvgIcon name="play" />
       </UiButton>

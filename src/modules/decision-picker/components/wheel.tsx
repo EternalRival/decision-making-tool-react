@@ -281,7 +281,6 @@ const Wheel = ({ rotation: baseRotation, optionSliceList: sliceList }: WheelProp
     const ctx = canvasRef.current?.getContext('2d');
 
     if (ctx) {
-      console.log(ctx);
       const rotation = (baseRotation + CIRCLE * 0.75) % CIRCLE;
 
       const computedStyle = getComputedStyle(document.documentElement);
