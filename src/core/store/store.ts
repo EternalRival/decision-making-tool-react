@@ -1,13 +1,16 @@
 import { configureStore } from '@reduxjs/toolkit';
-import soundReducer from '~/modules/decision-picker/store/sound-slice';
-import optionsReducer from './options-slice';
+import soundReducer, { persistSoundState } from '~/modules/decision-picker/store/sound-slice';
+import optionsReducer, { persistOptionsState } from './options-slice';
 
 const store = configureStore({
   reducer: {
-    options: optionsReducer,
-    sound: soundReducer,
+    ...optionsReducer,
+    ...soundReducer,
   },
 });
+
+persistOptionsState(() => store.getState().options);
+persistSoundState(() => store.getState().sound);
 
 export type RootState = ReturnType<typeof store.getState>;
 

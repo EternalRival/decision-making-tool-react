@@ -1,5 +1,8 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { z } from 'zod';
+import LSService from '~/core/services/local-storage.service';
+
+const STORAGE_KEY = 'options';
 
 const optionDataSchema = z.object({
   id: z.string(),
@@ -18,10 +21,13 @@ type OptionField = keyof OptionData;
 
 type OptionsState = z.infer<typeof optionsStateSchema>;
 
-const initialState: OptionsState = {
-  lastId: 1,
-  list: [{ id: `#1`, title: '', weight: '' }],
-};
+function initialState(): OptionsState {
+  try {
+    return optionsStateSchema.parse(LSService.get(STORAGE_KEY));
+  } catch {
+    return { lastId: 1, list: [{ id: `#1`, title: '', weight: '' }] };
+  }
+}
 
 const optionsSlice = createSlice({
   name: 'options',
@@ -68,8 +74,14 @@ const optionsSlice = createSlice({
 
 export const { addOption, updateOption, deleteOption, clearOptions, replaceOptions } = optionsSlice.actions;
 
-export function parseOptions(value: unknown) {
+export function parseOptionsState(value: unknown) {
   return optionsStateSchema.parse(value);
 }
 
-export default optionsSlice.reducer;
+export function persistOptionsState(getState: () => OptionsState) {
+  window.addEventListener('beforeunload', () => {
+    LSService.set(STORAGE_KEY, getState());
+  });
+}
+
+export default { [optionsSlice.reducerPath]: optionsSlice.reducer };
