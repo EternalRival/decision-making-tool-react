@@ -1,12 +1,10 @@
-import { resolve } from "node:path";
-
-import { defineConfig } from "vite";
-
-import react from "@vitejs/plugin-react-swc";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react-swc';
+import { resolve } from 'node:path';
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: "./",
+  base: './',
   plugins: [react()],
   server: {
     host: true,
@@ -16,12 +14,12 @@ export default defineConfig({
   },
   css: {
     modules: {
-      localsConvention: "camelCaseOnly",
+      localsConvention: 'camelCaseOnly',
     },
   },
   resolve: {
     alias: {
-      "~": resolve(import.meta.dirname, "src"),
+      '~': resolve(import.meta.dirname, 'src'),
     },
   },
 });

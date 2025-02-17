@@ -1,0 +1,107 @@
+.form {
+  display: grid;
+  grid-template:
+    'back-button sound-label duration-label' 1fr
+    'pick-button pick-button pick-button' 1fr
+    / 1fr 1fr;
+  gap: 0.5rem;
+
+  margin-inline: auto;
+
+  transition-duration: var(--transition-duration);
+
+  &.disabled {
+    pointer-events: none;
+    opacity: 0.8;
+    filter: grayscale(1);
+
+    :is(label, input, button) {
+      opacity: unset;
+      filter: unset;
+    }
+  }
+}
+
+.back-button {
+  composes: ui-button from '~/shared/ui/ui-button.module.css';
+  grid-area: back-button;
+}
+
+.sound-label {
+  composes: ui-button from '~/shared/ui/ui-button.module.css';
+  grid-area: sound-label;
+
+  &:has(:focus-visible) {
+    outline: none;
+    box-shadow: 0 0 0.25rem 0.1rem var(--color-primary-50);
+  }
+}
+
+.sound-input {
+  composes: sr-only from global;
+}
+
+.duration-label {
+  cursor: pointer;
+
+  display: flex;
+  grid-area: duration-label;
+  gap: 0.5rem;
+  align-items: center;
+
+  padding-left: 0.5rem;
+
+  color: var(--color-primary-50);
+
+  background-image: linear-gradient(var(--color-primary-300), var(--color-primary-700));
+  border-radius: 0.25rem;
+  box-shadow: 0 0 0.25rem 0.1rem var(--color-primary-200);
+}
+
+.duration-input {
+  max-width: 3.5rem;
+  height: 100%;
+  padding: 0.5rem;
+
+  line-height: normal;
+  color: var(--color-primary-50);
+
+  background-color: var(--color-primary-800);
+  border: none;
+  border-radius: 0 0.25rem 0.25rem 0;
+  outline: none;
+  box-shadow: 0 0 0.25rem 0.1rem var(--color-primary-200);
+
+  transition-duration: var(--transition-duration);
+  transition-property: box-shadow;
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    margin: 0;
+    appearance: none;
+  }
+
+  &::placeholder {
+    color: var(--color-primary-300);
+  }
+
+  &[type='number'] {
+    appearance: textfield;
+  }
+
+  &:focus-visible {
+    box-shadow:
+      0 0 0.25rem 0.1rem var(--color-primary-50),
+      inset 0 0 0.1rem 0.05rem var(--color-primary-50);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover:not(&:focus-visible) {
+      box-shadow: 0 0 0.25rem 0.1rem var(--color-primary-50);
+    }
+  }
+}
+
+.pick-button {
+  grid-area: pick-button;
+}

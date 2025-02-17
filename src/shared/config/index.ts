@@ -1,0 +1,7 @@
+export {
+  APP_NAME,
+  OPTIONS_JSON_FILE_NAME,
+  OPTIONS_STORAGE_KEY,
+  SLICE_LIST_MIN_LENGTH,
+  SOUND_STORAGE_KEY,
+} from './constants';
