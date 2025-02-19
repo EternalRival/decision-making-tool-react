@@ -4,17 +4,12 @@ import { optionsStateSchema, type OptionData, type OptionsState } from './option
 
 const STORAGE_KEY = 'options';
 
-function initialState(): OptionsState {
-  try {
-    return optionsStateSchema.parse(LSService.get(STORAGE_KEY));
-  } catch {
-    return { lastId: 1, list: [{ id: `#1`, title: '', weight: '' }] };
-  }
-}
-
 const optionsSlice = createSlice({
   name: 'options',
-  initialState,
+  initialState: () =>
+    optionsStateSchema
+      .catch({ lastId: 1, list: [{ id: `#1`, title: '', weight: '' }] })
+      .parse(LSService.get(STORAGE_KEY)),
   reducers: {
     addOption(state, { payload }: PayloadAction<Omit<OptionData, 'id'>>) {
       state.lastId += 1;

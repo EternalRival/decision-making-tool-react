@@ -4,17 +4,10 @@ import { decisionPickerStateSchema, type DecisionPickerState } from './decision-
 
 const STORAGE_KEY = 'decision-picker';
 
-const initialState = (): DecisionPickerState => {
-  try {
-    return decisionPickerStateSchema.parse(LSService.get(STORAGE_KEY));
-  } catch {
-    return { soundEnabled: true, durationValue: 16 };
-  }
-};
-
 const decisionPickerSlice = createSlice({
   name: 'decisionPicker',
-  initialState,
+  initialState: () =>
+    decisionPickerStateSchema.catch({ soundEnabled: true, durationValue: 16 }).parse(LSService.get(STORAGE_KEY)),
   reducers: {
     toggleMute(state) {
       state.soundEnabled = !state.soundEnabled;

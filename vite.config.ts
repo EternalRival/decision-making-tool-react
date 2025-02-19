@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { coverageConfigDefaults, defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react-swc';
 import { resolve } from 'node:path';
 
@@ -20,6 +20,20 @@ export default defineConfig({
   resolve: {
     alias: {
       '~': resolve(import.meta.dirname, 'src'),
+    },
+  },
+  test: {
+    environment: 'jsdom',
+    // setupFiles: resolve(import.meta.dirname, 'test/setup-vitest.ts'),
+    coverage: {
+      reporter: ['text'],
+      provider: 'v8',
+      exclude: [
+        ...coverageConfigDefaults.exclude,
+        '**/{lint-staged,stylelint}.config.*',
+        'vitest.setup.ts',
+        '**/index.ts',
+      ],
     },
   },
 });

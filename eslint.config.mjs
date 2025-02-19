@@ -8,7 +8,7 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['dist', '*.config.*'] },
+  { ignores: ['dist', '*.{config,setup}.*'] },
   { files: ['**/*.{ts,tsx}'] },
   { settings: { react: { version: '18.3' } } },
   {
@@ -116,6 +116,12 @@ export default tseslint.config(
           reservedFirst: false,
         },
       ],
+    },
+  },
+  {
+    files: ['**/*.spec.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/dot-notation': 'off',
     },
   }
 );

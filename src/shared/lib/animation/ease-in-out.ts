@@ -12,6 +12,10 @@ const easing = {
   },
 };
 
-export function easeInOut(progress: number): number {
-  return easing.easeInOutCubic(progress);
+export function easeInOut(progress: number, easingName: keyof typeof easing = 'easeInOutCubic'): number {
+  if (progress < 0 || progress > 1) {
+    throw new Error('Progress must be in [0, 1] range');
+  }
+
+  return easing[easingName](progress);
 }
